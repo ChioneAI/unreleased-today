@@ -1,0 +1,64 @@
+# 今日未发行 · UNRELEASED TODAY
+
+这是一个手机端优先的情绪与审美小玩具：用户选择今天的情绪、场景，写下一句话，就能得到一首现实中不存在的歌和一张 3:4 今日唱片分享图。
+
+当前版本完全使用 Mock 数据，不需要登录、不需要数据库，也不需要 API Key。
+
+## 本地启动
+
+1. 安装 Node.js 18 或更高版本。
+2. 在项目文件夹打开终端。
+3. 运行：
+
+```bash
+npm install
+npm run dev
+```
+
+4. 浏览器访问终端显示的地址，通常是 `http://localhost:3000`。
+
+正式检查可以运行：
+
+```bash
+npm run build
+npm run start
+```
+
+## 项目目录
+
+- `app/page.tsx`：三个核心页面和交互流程。
+- `app/globals.css`：视觉样式、移动端适配、封面模板样式。
+- `services/songGenerator.ts`：歌曲数据结构、40 条 Mock 歌曲和编号生成逻辑。
+- `services/albumGenerator.ts`：15 套封面配色与模板类型。
+- `app/api/generate-song/route.ts`：预留的服务端生成接口，目前返回 Mock 结果。
+- `public/favicon.svg`：网站图标。
+- `.env.example`：未来接入 AI 时的环境变量示例。
+
+## 修改 Mock 歌曲
+
+打开 `services/songGenerator.ts`，编辑 `library` 数组。每首歌都遵守同一结构：歌名、流派、时长、歌词、专辑名和 `visualMood`。继续增加对象即可扩充歌曲库。
+
+## 修改专辑封面模板
+
+打开 `services/albumGenerator.ts`，编辑 `palettes` 数组。每个模板包含背景色、文字色、点缀色和 `kind`。`app/globals.css` 里有对应的 `kind-*` 样式，可以继续增加不同的排版纹理。
+
+## 如何接入真实 AI API
+
+现在前端直接调用 `createSong`，所以没有 API Key 也能运行。项目已经预留 `app/api/generate-song/route.ts`，目前它仍返回 Mock 结果。未来只需要在这个服务端 Route 中调用模型，并保持返回与 `Song` 相同的 JSON 结构；前端再把生成函数改成请求这个接口即可。
+
+API Key 只放在服务端环境变量里，不要写进 `page.tsx`，也不要使用 `NEXT_PUBLIC_` 前缀暴露给浏览器。复制 `.env.example` 为 `.env.local`，填写 `OPENAI_API_KEY=` 即可作为本地开发配置。
+
+## 部署到 Vercel
+
+1. 把整个项目上传到自己的 GitHub 仓库。
+2. 登录 Vercel，点击 **Add New Project**，选择这个仓库。
+3. Framework 选择 Next.js，Build Command 保持默认，点击 Deploy。
+4. 当前 Mock 版本不需要填写环境变量。未来接 AI 时，在 Vercel 项目的 **Settings → Environment Variables** 中添加 `OPENAI_API_KEY`。
+
+## 绑定自己的域名
+
+在 Vercel 项目的 **Settings → Domains** 中输入自己的域名。Vercel 会显示需要添加的 DNS 记录，按提示在域名服务商后台保存即可。
+
+## 未来增加数据库
+
+如果未来要保存用户生成记录，建议先接 Supabase（Postgres）或 Neon；如果只需要轻量的匿名记录，也可以使用 Vercel KV/Redis。数据库访问应放在服务端 API Route，前端不直接暴露密钥。
